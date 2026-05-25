@@ -1,0 +1,26 @@
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Secrets — never commit
+secrets/
+*.key
+*.pem
+**/*.env
+**/.env
+
+# Local-only Python artifacts (if you add tools/ Python helpers later)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Logs
+*.log
+
+# Locally-generated data caches
+**/.cache/
+*.sqlite
+*.db
