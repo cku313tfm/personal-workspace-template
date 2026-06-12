@@ -30,7 +30,7 @@ Don't build this if you:
 ### Step 1 — Clone
 
 ```bash
-git clone https://github.com/<your-username>/personal-workspace-template.git my-workspace
+git clone https://github.com/cku313tfm/personal-workspace-template.git my-workspace
 cd my-workspace
 ```
 
