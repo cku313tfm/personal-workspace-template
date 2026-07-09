@@ -21,10 +21,10 @@ Don't build this if you:
 
 ### Prerequisites
 
-- A GitHub account
+- A GitHub account (for backing up your workspace)
 - Claude Code installed ([install instructions](https://docs.claude.com/en/docs/claude-code/quickstart))
-- `gh` CLI installed and authenticated (`gh auth login`)
 - `git` installed
+- `gh` CLI installed and authenticated (`gh auth login`) — only if you pick the GitHub Issues task board at bootstrap; the file-based board needs no token
 - Ability to open files in an editor (any will do — VS Code, Cursor, vim, etc.)
 
 ### Step 1 — Clone
@@ -74,25 +74,27 @@ Tell it your top current priority. It writes to `plan.md`. From here, you're ope
 - **Orchestrator agent** — coordinates domains, runs morning briefs, dispatches work
 - **1-4 domain operator agents** — each owns a domain end-to-end (Finance / Networking / Health / Career / Study / Side-business / Creative / Family — you pick)
 - **Optional synthesis agent** — compounding knowledge base layer for capturing meeting substrate, building theses, externalizing thinking
-- **Workspace rules** — operating discipline (summon protocol, approval gates, memory conventions, dispatch protocol)
-- **Checkout playbook** — deterministic session-end discipline (memory write, lesson promotion, flag janitor, routing pass, commit check)
-- **GitHub Issues task board** — agent tasks tracked as labeled issues
+- **Workspace rules** — operating discipline (summon protocol, approval gates, memory conventions, canonical-source discipline, dispatch protocol, flag hygiene, optional quality gates)
+- **Checkout playbook** — deterministic session-end discipline (memory write, lesson promotion, canonical-verification gate, flag janitor, routing pass, commit check)
+- **Task board, your choice** — GitHub Issues *or* a file-based `agents/backlog.md` (works with no GitHub token)
 - **Memory persistence** — daily logs, long-term curated memory, cross-agent flags
+- **Session-flags hook** — `agents/flags.md` is injected into context at the start of every prompt, so cross-session follow-ups surface without a command
+- **`/startup` + `council` skills** — a scripted startup routine, and an optional advisory-panel skill to pressure-test decisions and external sends
+- **Google helpers** (`tools/google/`) — optional Python scripts for Gmail / Calendar / Tasks / Docs. Bring your own OAuth credentials (`tools/SETUP_GOOGLE_OAUTH.md`)
 
 ## What you don't get yet (upgrade paths)
 
 The MVP is intentionally lean — get value within 30 min, add complexity only when you feel the pain.
 
-Upgrade paths (refer to `docs/build-from-scratch.md` for the patterns):
+The Google helpers ship in `tools/google/` but stay dormant until you add your own credentials. Beyond that, these patterns are described in `docs/build-from-scratch.md` for you to build when you feel the pain:
 
-- **Google integrations** (Calendar / Gmail / Tasks via Python helpers) — when you want your orchestrator to surface calendar conflicts, watch email thread state, manage external tasks
-- **Intake pipeline** (newsletters → daily must-reads) — when you have a domain mastery program and want signal-routed reading instead of inbox scan
-- **Synthesis skill** (`/synthesize-intake`) — when intake has accumulated and you need on-demand "what does this week mean for X" capability
-- **Networking SQLite layer** — when you have 1000+ LinkedIn connections and want bulk "who do I know at X" queries
-- **Council skill** — when you face decisions that benefit from multiple expert voices
+- **Wire up the Google helpers** — add OAuth credentials so your orchestrator can surface calendar conflicts, watch email thread state, and manage tasks (the canonical-source discipline in the rules only bites once a helper exists)
+- **Intake pipeline** (newsletters → daily must-reads) — signal-routed reading instead of an inbox scan
+- **Synthesis knowledge base** — if you elected a synthesis agent, an on-demand "what does this week mean for X" capability over accumulated substrate
+- **Contacts DB layer** — when you have a large contact export and want bulk "who do I know at X" queries
 - **Soft bridge** — when you have a second workspace (business / family) that benefits from one-way context sharing
 
-Each upgrade is documented and optional. The MVP works without any of them.
+Each is optional. The MVP works without any of them.
 
 ## Architecture reference
 

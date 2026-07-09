@@ -283,32 +283,25 @@ Daily logs accumulate fast. Don't try to keep them clean. The signal is in the v
 
 Commit. Now you have a memory system.
 
-### Step 5. GitHub Issues task board
+### Step 5. The task board (pick one)
 
-Use GitHub Issues as the cross-agent task board. It's free, has a CLI, and works across machines and clones.
+Agents need a shared, durable board for multi-session work. Two options work equally well — the rest of the system doesn't care which you pick. (The bootstrap agent asks you this at setup.)
 
-Create labels for each agent and three priority tiers:
+**Option A — GitHub Issues.** Free, has a CLI, a real tracker. Good if you already live in GitHub. Create labels for each agent and three priority tiers:
 
 ```bash
 gh label create "agent:<orchestrator>" --color "0E8A16"
 gh label create "agent:<domain1>" --color "1D76DB"
-gh label create "agent:<domain2>" --color "5319E7"
-# etc
-
 gh label create "priority:high" --color "B60205"
 gh label create "priority:medium" --color "D93F0B"
 gh label create "priority:low" --color "FBCA04"
-
 gh label create "needs:user-decision" --color "0075CA"
 ```
+Title convention: `[Agent] <action>`. Required labels per issue: one agent label + one priority label; add `needs:user-decision` if blocked on you. Agents read their queue via `gh issue list`.
 
-Title convention: `[Agent] <action>`. Example: `[Finance] Q2 estimated tax deadline prep`.
+**Option B — File-based board** (`agents/backlog.md`, in-repo). One line per item: `#ref · priority · owner · one-liner · (date added)`, grouped under an `## <Agent>` heading with `**Active**` / `**Backlog**` sub-blocks; done items move to `## Archive`. Advantages: it folds into the same startup read as `flags.md` (no extra command), and it works from any client that can read the repo but **can't authenticate to GitHub** — e.g. a phone or remote agent with no token. This is why the reference workspace moved its board into a file.
 
-Required labels per issue: one agent label + one priority label. Add `needs:user-decision` if blocked on you.
-
-This is the task board. Every agent reads its own queue at session start. The orchestrator reads the full board to dispatch. When an issue is done, the agent that did it closes it with a comment naming what shipped.
-
-Don't sync to Notion or Linear or Asana. Pick one and stay there. The agents read the issue list directly via `gh issue list`. Adding a sync layer adds breakage points.
+Either way: every agent reads its own section at session start; the orchestrator reads the whole board to dispatch; a finished item is closed/archived with a one-line note on what shipped. **Don't sync to Notion / Linear / Asana** — pick one board and stay there. And keep this *agent* board distinct from your own external-action to-do list (sends, clicks, applications); merging them pollutes the one list you prune each morning.
 
 ### Step 6. Domain operator agents
 
@@ -871,6 +864,8 @@ Without this, agents skip the file reads on resumed sessions and drift into stal
 Once you wire up Calendar and Gmail (via Python helpers, not MCP — see Step 8 for why), write the rule into `workspace-core.md` that the helper output is canonical and text files are auxiliary. Without this rule, an agent will confidently quote a stale date from a flag file and you'll find out three days later that the meeting is on a different day than you thought.
 
 In this workspace's case, a flag once said "Apprenticeship Thursday default" and the calendar said "Tuesday recurring weekly." The flag was wrong. The rule makes calendar the tiebreaker, every time.
+
+The same rule bites hardest **at checkout**, not just startup — it's the moment you're about to clear a flag or write a summary. If a flag says "reply staged, not sent," verify against the live email source before you clear it or report it: a staged draft reads as sent if you trust the flag text, and a still-pending item reads as done. The checkout playbook (Step 3) makes this a gate: a send-flag clears only on a confirmed sent hit. Two of the additions the reference workspace hardened after this guide's first draft — the **checkout canonical-verification gate** and the **`session-flags` hook** (which injects `agents/flags.md` into every prompt so nothing gets lost between sessions) — both exist to protect this rule. Keep `flags.md` lean (one-line flags, delete-on-clear) precisely because the hook loads the whole file every prompt.
 
 ### 3. Approval gates are real
 

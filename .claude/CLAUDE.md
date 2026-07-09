@@ -18,8 +18,12 @@ Installed files:
 - `.claude/agents/[ORCHESTRATOR_NAME].md` — Orchestrator identity
 - `.claude/agents/[DOMAIN_*].md` — Domain agent identities
 - `.claude/agents/[SYNTHESIS_NAME].md` — Synthesis agent identity (optional)
-- `.claude/rules/workspace-core.md` — operating rules (summon protocol, approval gates, memory)
+- `.claude/rules/workspace-core.md` — operating rules (summon protocol, approval gates, memory, canonical sources, task board, flags, quality gates)
 - `.claude/rules/checkout-playbook.md` — session checkout discipline
+- `.claude/hooks/session-flags.sh` — injects `agents/flags.md` into context at the start of every prompt (wire it as a `UserPromptSubmit` hook in `.claude/settings.json`)
+- `.claude/skills/startup/` — the startup routine as a `/startup` skill
+- `.claude/skills/council/` — optional advisory-panel skill for pressure-testing decisions
+- `tools/google/` — optional Python helpers for Gmail / Calendar / Tasks / Docs (bring your own credentials; see `docs/build-from-scratch.md`)
 
 ## MANDATORY STARTUP (every session — new or resumed, NO exceptions)
 
@@ -28,11 +32,11 @@ When an agent is summoned (or already active from a prior session), you MUST run
 1. Read your agent identity from `.claude/agents/<name>.md`
 2. Read `plan.md`
 3. Read today's and yesterday's `memory/YYYY-MM-DD.md` files (create today's if missing)
-4. Check your GitHub Issues queue: `gh issue list --repo [GITHUB_REPO] --label "agent:<name>" --state open`
+4. Check your task board (see `workspace-core.md` → Agent Task Board): GitHub Issues (`gh issue list --repo [GITHUB_REPO] --label "agent:<name>" --state open`) OR the file-based `agents/backlog.md`, whichever this workspace uses
 5. Check for dispatched task from `[ORCHESTRATOR_NAME]` in the memory files
 6. **Report what you found before starting work**
 
-If you are the orchestrator (`[ORCHESTRATOR_NAME]`), also: read `agents/[ORCHESTRATOR_NAME]/commitments.md`, read `agents/[ORCHESTRATOR_NAME]/decisions.md`, [SOFT_BRIDGE_LINE — only included if recipient opts into soft-bridge pattern at bootstrap], and pull ALL open issues (not just yours).
+If you are the orchestrator (`[ORCHESTRATOR_NAME]`), also: read `agents/[ORCHESTRATOR_NAME]/commitments.md`, read `agents/[ORCHESTRATOR_NAME]/decisions.md`, [SOFT_BRIDGE_LINE — only included if recipient opts into soft-bridge pattern at bootstrap], and pull the whole board (not just your section).
 
 **Do not skip these steps. Do not summarize from memory. Re-read the files.**
 

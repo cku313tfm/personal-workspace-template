@@ -65,11 +65,14 @@ Ask each via AskUserQuestion, in order:
 
 If they pick "Yes, custom name," follow up with a text question for the actual name.
 
-### Question 5 — GitHub repo
-**Question:** "What's the GitHub repo URL where agent tasks will live as Issues? Format: `<owner>/<repo-name>` (e.g., `cku313tfm/ck-personal`). Create the repo on GitHub first if you haven't — it can be private."
-**Header:** "GitHub repo"
+### Question 5 — Task board
+**Question:** "Where should agent tasks live? Two options, both work: **GitHub Issues** (a real tracker; needs a repo + `gh` auth) or a **file-based board** (`agents/backlog.md`, in-repo — folds into the same startup read as flags, and works from clients that can't auth to GitHub)."
+**Header:** "Task board"
 **Options:**
-- Single text-entry; collect the `owner/repo` format
+- "File-based (`agents/backlog.md`)" — description: "Simplest. Recommended for first-time setup. No GitHub token needed."
+- "GitHub Issues" — description: "A real issue tracker. Provide the `<owner>/<repo-name>` (e.g., `<your-username>/<your-workspace>`); create the repo first — it can be private."
+
+If they pick GitHub Issues, follow up with a text question for the `owner/repo` format. If they pick file-based, no repo string is needed for the board (they still need this repo pushed somewhere for backup).
 
 ### Question 6 — Soft bridge (optional)
 **Question:** "Do you have a separate workspace (e.g., a business workspace) that this personal workspace should soft-bridge to? Soft-bridge means your orchestrator reads the other workspace's `plan.md` at session start, one-way, for cross-context."
@@ -81,7 +84,7 @@ If they pick "Yes, custom name," follow up with a text question for the actual n
 ### Question 7 — Confirm + execute
 After collecting answers, surface the summary and ask one final question via AskUserQuestion:
 
-**Question:** "Ready to apply these settings? This will rename files, run gh label create, and make the initial commit."
+**Question:** "Ready to apply these settings? This will rename files, set up your task board, wire the session-flags hook, and make the initial commit."
 **Header:** "Ready to apply?"
 **Options:**
 - "Apply now" — description: "Run the bootstrap"
@@ -142,8 +145,30 @@ For each agent (orchestrator + domains + synthesis):
 - `agents/flags.md` — with the header from the reference workspace (cross-agent session-end flags)
 - `memory/.gitkeep` — empty
 
-### Step 5 — Run gh label create
+### Step 5 — Set up the task board (per Q5)
 
+**If they chose the file-based board:** create `agents/backlog.md` with a section per agent:
+```markdown
+# Agent Task Board
+
+Format: `#ref · priority · owner · one-liner · (date added)`. Priority = high / medium / low.
+Done items move to `## Archive` with a one-line outcome (pruned at the weekly checkpoint).
+
+## <Orchestrator>
+**Active**
+**Backlog**
+
+## <Domain 1>
+**Active**
+**Backlog**
+
+<!-- one section per elected agent -->
+
+## Archive
+```
+No GitHub labels needed. Skip to Step 6.
+
+**If they chose GitHub Issues:** run `gh label create` for the board:
 ```bash
 gh label create "agent:<orchestrator-lowercased>" --repo <github-repo> --color "0e8a16" --description "Orchestrator-owned tasks"
 gh label create "agent:<domain-lowercased>" --repo <github-repo> --color "1d76db" --description "Domain agent tasks" # per domain
@@ -153,6 +178,20 @@ gh label create "priority:medium" --repo <github-repo> --color "fbca04" --descri
 gh label create "priority:low" --repo <github-repo> --color "cccccc" --description "Low priority"
 gh label create "needs:user-decision" --repo <github-repo> --color "d93f0b" --description "Blocked on user"
 ```
+
+### Step 5.5 — Wire the session-flags hook
+
+The `.claude/hooks/session-flags.sh` hook injects `agents/flags.md` into context at the start of every prompt, but only if it's registered. Ensure `.claude/settings.json` contains a `UserPromptSubmit` hook pointing at it (create the file if missing):
+```json
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": ".claude/hooks/session-flags.sh" } ] }
+    ]
+  }
+}
+```
+Make the script executable: `chmod +x .claude/hooks/session-flags.sh`.
 
 ### Step 6 — Print "What's next" checklist
 
@@ -168,11 +207,15 @@ What's next:
 3. Tell the orchestrator your top current priority — it will write to plan.md.
 4. Start using domain agents as needs arise.
 
-Optional upgrades (refer to docs/build-from-scratch.md):
-- Google integrations (Calendar, Gmail, Tasks) — Step 8 of the guide.
-- Intake pipeline + synthesis skill — referenced in Step 7 (synthesis agent) and external substrate.
-- Council skill for advisory perspectives.
-- Networking SQLite layer for bulk contact queries.
+Already installed (use when you want them):
+- `/startup` skill — scripts the mandatory startup reads.
+- `council` skill — advisory-panel pressure-test for real decisions and external sends.
+- `session-flags` hook — surfaces flags.md every prompt (wired in Step 5.5).
+- `tools/google/` — Gmail / Calendar / Tasks / Docs helpers. Bring your own OAuth credentials: see `tools/SETUP_GOOGLE_OAUTH.md`, then `docs/build-from-scratch.md`.
+
+Optional upgrades to build yourself (refer to docs/build-from-scratch.md):
+- Domain-specific tool integrations (brokerage, health devices, etc.) — follow the `tools/google/` pattern.
+- Intake pipeline + a synthesis knowledge base — if you elected a synthesis agent.
 
 The MVP works without any of these. Add upgrades only when you feel the pain of not having them.
 ```

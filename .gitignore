@@ -24,3 +24,26 @@ venv/
 **/.cache/
 *.sqlite
 *.db
+
+# ============================================================================
+# PERSONAL-DATA WALLS — uncomment the blocks for the domains you actually use.
+# The rule: raw dumps (statements, exports, records, contact lists) stay
+# gitignored; your workspace .md files carry only the DERIVED facts (a runway
+# figure, a trend, a warmth tier) — never the raw source. See workspace-core.md
+# → "Keeping personal data out of git".
+#
+# NOTE: gitignoring a file does NOT remove it from earlier commits. If you ever
+# make this repo public or share it, start from clean history — don't scrub.
+# ============================================================================
+
+# Finance — brokerage/bank exports, holdings, transactions, statements, 13Fs
+# agents/finance/data/
+
+# Health — clinical records (PHI) + biometric device exports
+# agents/health/records/
+# agents/health/data/
+
+# Networking — contact exports with emails/phones, LinkedIn data export
+# agents/networking/data/
+# *LinkedInDataExport*
+# Connections.csv
